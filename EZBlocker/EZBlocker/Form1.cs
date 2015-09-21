@@ -21,6 +21,8 @@ namespace EZBlocker
         private bool spotifyMute = false;
         private float volume = 0.9f;
         private string lastArtistName = "N/A";
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
 
         private string nircmdPath = Application.StartupPath + @"\nircmd.exe";
         private string jsonPath = Application.StartupPath + @"\Newtonsoft.Json.dll";
@@ -68,6 +70,19 @@ namespace EZBlocker
                 MessageBox.Show(".Net Framework 3.5 not found. EZBlocker may not work properly.", "EZBlocker");
 
             InitializeComponent();
+        }
+
+        [DllImportAttribute("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [DllImportAttribute("user32.dll")]
+        public static extern bool ReleaseCapture();
+        private void Main_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
         }
 
         /**
@@ -119,7 +134,9 @@ namespace EZBlocker
                     if (muted) Mute(0);
                     if (lastArtistName != whr.artistName)
                     {
-                        StatusLabel.Text = "Playing: " + ShortenName(whr.artistName);
+                        StatusLabel.Text = "Track: " + ShortenName(whr.trackName);
+                        TrackName.Text = "Artist: " + ShortenName(whr.artistName);
+                        AlbumName.Text = "Album: " + ShortenName(whr.albumName);
                         lastArtistName = whr.artistName;
                     }
                 }
@@ -241,9 +258,9 @@ namespace EZBlocker
 
         private string ShortenName(string name)
         {
-            if (name.Length > 12)
+            if (name.Length > 30)
             {
-                return name.Substring(0, 12) + "...";
+                return name.Substring(0, 30) + "...";
             }
             return name;
         }

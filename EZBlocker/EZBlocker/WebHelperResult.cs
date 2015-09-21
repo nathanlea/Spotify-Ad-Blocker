@@ -15,5 +15,8 @@ namespace EZBlocker
         public int length = 1234;
 
         public string artistName = "N/A";
+        public string trackName = "N/A";
+        public string albumName = "N/A";
+        public string uri = "N/A";
     }
 }
